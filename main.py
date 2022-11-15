@@ -37,21 +37,24 @@ def update_managed_prefix_list(list_name, ip):
         print(e)
         print("Failed to update list")
 def check_ip_type(list_name, ip_list):
-    for ip in ip_list:
-        if type(ipaddress.ip_address(ip[:-3])) is ipaddress.IPv6Address:
-            managed_prefix_list_name = "git-" + list_name + "-ipv6"
-            print(ip)
-            update_managed_prefix_list(managed_prefix_list_name, ip)
-        else:
-            managed_prefix_list_name = "git-" + list_name + "-ipv4"
-            print(ip)
-    pass
-
+    try:
+        for ip in ip_list:
+            if type(ipaddress.ip_address(ip[:-3])) is ipaddress.IPv6Address:
+                print(ip)
+                update_managed_prefix_list(list_name, ip)
+            else:
+                update_managed_prefix_list(list_name, ip)
+                print(ip)
+        return True
+    except:
+        return False
 if __name__ == "__main__":
-    url = "https://api.github.com/meta"
-    headers = {"Accept": "application/vnd.github+json", "Authorization": "Bearer "+ os.environ['SECRET']}
+    url = "https://<my IP address URL>"
+    headers = {}
     r = requests.get(url, headers=headers)
     json_ips = json.loads(r.content)
-    hooks = json_ips['hooks']
 
-    check_ip_type("hooks", hooks)
+    if check_ip_type("hooks", hooks) == True:
+        print("Successfully Added IPs")
+    else:
+        print("Failed to add IPs")
